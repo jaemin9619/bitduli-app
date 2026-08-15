@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with custom nickname and color choice",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "nickname": { "type": "string" },
+        "profileColorName": { "type": "string" },
+        "profileColorHex": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "nickname", "profileColorName", "profileColorHex"]
+    },
+    "DiaryEntry": {
+      "title": "DiaryEntry",
+      "description": "A single day's picture diary entry",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "text": { "type": "string" },
+        "svgDrawing": { "type": "string" },
+        "feeling": { "type": "string" },
+        "title": { "type": "string" },
+        "weather": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "summary": { "type": "string" }
+      },
+      "required": ["date", "text", "svgDrawing", "feeling", "createdAt"]
+    },
+    "FriendConnection": {
+      "title": "FriendConnection",
+      "description": "Friendship state between two users",
+      "type": "object",
+      "properties": {
+        "friendEmail": { "type": "string" },
+        "friendNickname": { "type": "string" },
+        "friendColorHex": { "type": "string" },
+        "status": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["friendEmail", "status", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{email}": {
+      "schema": "UserProfile",
+      "description": "Collection of all user profiles registered in the system"
+    },
+    "/users/{email}/diaries/{date}": {
+      "schema": "DiaryEntry",
+      "description": "Diaries written by a specific user"
+    },
+    "/users/{email}/friends/{friendEmail}": {
+      "schema": "FriendConnection",
+      "description": "Friend relationship or request from user {email} with friend {friendEmail}"
+    }
+  }
+}

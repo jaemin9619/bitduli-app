@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Outfit", system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", "Inter", sans-serif;
+  --font-hand: "Gamja Flower", cursive, sans-serif;
+  --font-pen: "Nanum Pen Script", cursive;
+}
+
+/* Custom handwriting and paper elements */
+.paper-pattern {
+  background-color: #fcf9f2;
+  background-image: radial-gradient(#e1dbcd 1px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 8px 8px;
+}
+
+.notebook-line {
+  background-image: linear-gradient(#e5dec9 1px, transparent 1px);
+  background-size: 100% 32px;
+  line-height: 32px;
+}
+
+/* Shaky outline simulation to match the "삐뚤빼뚤" (crooked/hand-drawn) vibe */
+.shaky-border {
+  border: 2px solid currentColor;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+}
+
+.shaky-border-sm {
+  border: 1.5px solid currentColor;
+  border-radius: 120px 8px 110px 8px/8px 110px 8px 120px;
+}
+
+.shaky-shadow {
+  box-shadow: 4px 4px 0px 0px currentColor;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom scrollbar for the date picker so it is clearly visible and does not overflow */
+.picker-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: #94a3b8 #f1f5f9 !important;
+}
+
+.picker-scrollbar::-webkit-scrollbar {
+  width: 7px !important;
+}
+
+.picker-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-radius: 999px !important;
+}
+
+.picker-scrollbar::-webkit-scrollbar-thumb {
+  background: #94a3b8 !important;
+  border-radius: 999px !important;
+  border: 1px solid #f1f5f9 !important;
+}
+
+.picker-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b !important;
+}
+
+/* Bounce & wiggle animations for the smiley logo */
+@keyframes soft-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes soft-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-soft-bounce {
+  animation: soft-bounce 3s ease-in-out infinite;
+}
+
+.animate-soft-wiggle {
+  animation: soft-wiggle 4s ease-in-out infinite;
+}
+
+/* Slide up and Fade-in transitions for iOS Share Sheet & details */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.22s ease-out forwards;
+}
+
