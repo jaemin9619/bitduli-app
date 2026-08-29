@@ -1,5 +1,14 @@
 import { HttpsError } from "firebase-functions/v2/https";
 
+export const ALLOWED_FEELINGS = Object.freeze([
+  "Happy",
+  "Excited",
+  "Sad",
+  "Angry",
+  "Tired",
+  "Calm"
+]);
+
 /** Returns the signed-in user's normalized email or rejects the request. */
 export function requireEmail(request) {
   const email = request.auth?.token?.email;
@@ -27,4 +36,26 @@ export function requireDiaryText(value) {
     throw new HttpsError("invalid-argument", "Diary text is required.");
   }
   return value.trim().slice(0, 4000);
+}
+
+/** Returns a supported feeling, using Happy only when the value is omitted. */
+export function normalizeFeeling(value) {
+  if (value === undefined || value === null) {
+    return "Happy";
+  }
+  if (typeof value !== "string" || !ALLOWED_FEELINGS.includes(value)) {
+    throw new HttpsError("invalid-argument", "Valid feeling is required.");
+  }
+  return value;
+}
+
+/** Returns a normalized #RRGGBB color, using the existing default when omitted. */
+export function normalizeProfileColorHex(value) {
+  if (value === undefined || value === null) {
+    return "#FFF275";
+  }
+  if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) {
+    throw new HttpsError("invalid-argument", "Valid profile color is required.");
+  }
+  return value.toUpperCase();
 }
