@@ -35,14 +35,21 @@ functions/
 
 | 함수 | 요청 `data` | 성공 응답 | 주요 검증·오류 |
 | --- | --- | --- | --- |
-| `summarizeDiary` | `diaryText: string`, `feeling` | `{ summary, isMock }` | 본문 2자 이상, 최대 4,000자 |
-| `generateDiaryDrawing` | `diaryText: string`, `profileColorHex`, `profileColorName`, `feeling` | AI 성공 시 `{ imageBase64, mimeType, isMock: false }`, fallback 시 `{ imageDataUrl, isMock: true }` | 본문 2자 이상, 최대 4,000자; timeout 120초, memory 1GiB |
+| `summarizeDiary` | `diaryText: string`, `feeling` | `{ summary, isMock }` | 본문 2자 이상, 최대 4,000자; 감정값 검증 |
+| `generateDiaryDrawing` | `diaryText: string`, `profileColorHex`, `profileColorName`, `feeling` | AI 성공 시 `{ imageBase64, mimeType, isMock: false }`, fallback 시 `{ imageDataUrl, isMock: true }` | 본문·감정·`#RRGGBB` 검증; timeout 120초, memory 1GiB |
 | `sendFriendRequest` | `targetEmail: string` | `{ ok: true, friendNickname }` | `invalid-argument`, `failed-precondition`, `not-found`, `already-exists` |
 | `acceptFriendRequest` | `targetEmail: string` | `{ ok: true }` | `invalid-argument`, `not-found`, `failed-precondition` |
 | `declineFriendRequest` | `targetEmail: string` | `{ ok: true }` | 이메일 형식 검증 |
 | `removeFriend` | `targetEmail: string` | `{ ok: true }` | 이메일 형식 검증 |
 
 AI 키가 없거나 AI 생성이 실패하면 일기 함수는 기존 응답 형태의 로컬 fallback을 반환한다. 친구 요청과 수락은 양쪽 사용자 문서를 Firestore 트랜잭션으로 함께 변경한다.
+
+- 허용 감정값은 `Happy`, `Excited`, `Sad`, `Angry`, `Tired`, `Calm`이다. 값이 없으면 `Happy`를 사용하고, 잘못된 값은 `invalid-argument`로 거절한다.
+- 프로필 색상은 값이 없으면 `#FFF275`를 사용한다. 제공된 값은 `#RRGGBB` 형식이어야 한다.
+- 친구 요청은 양쪽에 기존 관계가 없어야 하며, 요청자 `sent`·상대방 `received`를 한 트랜잭션에서 기록한다.
+- 친구 수락은 수락자 `received`·상대방 `sent`가 모두 확인되어야 한다. 거절은 `sent`/`received`, 삭제는 양쪽 `accepted` 상태에서만 허용하며 잘못된 상태는 `failed-precondition`이다.
+- 친구 함수의 프로필·관계 읽기는 트랜잭션 안에서 쓰기보다 먼저 수행한다. 거절과 삭제도 양쪽 문서를 같은 트랜잭션에서 삭제한다.
+- `aiUsage` 기록은 best-effort이다. 기록 실패는 비민감한 사용 유형만 경고로 남기며, 이미 생성된 AI 결과는 그대로 반환한다.
 
 ## Secret과 환경 설정
 
@@ -61,9 +68,13 @@ npm run lint
 npm run build
 npm --prefix functions ci
 npm --prefix functions run lint
+npm --prefix functions test
+npm --prefix functions run test:emulator
 ```
 
 개발 화면은 `npm run dev`, 빌드 결과 미리보기는 `npm start`를 사용한다. Functions 배포는 별도 검토 후 Firebase CLI로 수행하며 이 저장소 작업만으로 자동 배포되지 않는다.
+
+`test`는 Node 기본 테스트 러너로 검증·인증·AI fallback·응답 계약·사용 기록 실패를 검사한다. `test:emulator`는 OpenJDK 21과 로컬 Firebase CLI를 사용해 `demo-bitduli` Firestore Emulator에서 친구 관계의 원자성을 검사한다. 테스트는 실제 Gemini API나 운영 Firestore 프로젝트에 접근하지 않는다.
 
 ## 수정 규칙과 담당 경계
 
@@ -71,6 +82,7 @@ npm --prefix functions run lint
 - 새 callable 구현은 `functions/src/`의 해당 책임 모듈에 두고 `index.js`에는 export만 추가한다.
 - Firebase Admin 초기화, 리전, Secret 선언은 `config.js`에서만 관리한다.
 - 사용자 입력은 `validation.js`를 거치고, 인증·오류 코드·fallback·트랜잭션 동작을 변경하면 프런트 담당자와 먼저 계약을 합의한다.
+- 새 서버 모듈이나 테스트 파일은 `functions/scripts/checkSyntax.js`의 재귀 문법 검사 대상 디렉터리 안에 둔다.
 - 프런트 담당자는 React 화면, 상태, 로딩/오류 표시와 `src/lib/backend.ts` 연결을 맡는다. 서버 구현이나 Secret을 프런트로 복제하지 않는다.
 - Firestore 규칙은 프런트의 직접 접근이 남아 있으므로 callable 이전과 규칙 변경을 같은 변경으로 검증한다.
 
@@ -86,6 +98,7 @@ npm --prefix functions run lint
 - `GEMINI_API_KEY` Secret의 프로젝트 등록·권한·함수 연결을 확인한다.
 - 인증 없음, 잘못된 이메일·일기, AI 실패, 중복 친구 요청, 수락 조건 실패를 에뮬레이터에서 확인한다.
 - 친구 요청·수락의 양방향 문서와 트랜잭션 결과를 확인한다.
+- 잘못된 감정·색상, 거절·삭제 상태 불일치, `aiUsage` 기록 실패를 확인한다.
 - 프런트 빌드와 Functions lint를 통과시키고 Firebase 프로젝트 별칭을 확인한다.
 - 직접 Firestore 접근과 현재 보안 규칙이 충돌하지 않는지 확인한다.
 - 배포 후 Functions 로그, AI 사용 기록, timeout·memory, fallback 비율을 확인한다.

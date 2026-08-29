@@ -50,5 +50,11 @@
       "source": "functions",
       "codebase": "default"
     }
-  ]
+  ],
+  "emulators": {
+    "firestore": {
+      "port": 8085
+    },
+    "singleProjectMode": true
+  }
 }
