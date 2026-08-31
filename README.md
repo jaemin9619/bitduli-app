@@ -1,6 +1,6 @@
 # Bitduli App
 
-Bitduli는 React 프런트엔드와 Firebase를 사용하는 일기 애플리케이션이다.
+Bitduli는 `final/bitduli-app`에 있는 React 프런트엔드와 Firebase 기반 일기 애플리케이션이다.
 
 `codex/server-refactor` 브랜치는 `main`의 화면과 외부 API 계약은 유지하면서, 서버를 Firebase Functions 하나로 정리하고 안정성 검사와 테스트를 추가한 브랜치이다.
 
@@ -8,15 +8,15 @@ Bitduli는 React 프런트엔드와 Firebase를 사용하는 일기 애플리케
 
 ```text
 사용자
-  → React 화면(src/)
-  → src/lib/backend.ts
-  → Firebase callable Functions(functions/)
+  → React 화면(final/bitduli-app/src/)
+  → final/bitduli-app/src/lib/backend.ts
+  → Firebase callable Functions(final/bitduli-app/functions/)
   → Firestore 또는 Gemini AI
   → React 화면에 결과 반환
 ```
 
-- 루트 `src/`는 브라우저에서 실행되는 화면 코드이다.
-- `functions/src/`는 Firebase 서버에서 실행되는 인증, 검증, AI, 친구 기능 코드이다.
+- `final/bitduli-app/src/`는 브라우저에서 실행되는 화면 코드이다.
+- `final/bitduli-app/functions/src/`는 Firebase 서버에서 실행되는 인증, 검증, AI, 친구 기능 코드이다.
 - 두 폴더는 이름만 같을 뿐 서로 다른 프로그램의 소스 폴더이다.
 
 ## `main` 대비 서버 변경사항
@@ -33,7 +33,7 @@ Bitduli는 React 프런트엔드와 Firebase를 사용하는 일기 애플리케
 
 `main`에서는 설정, 입력 검증, AI 처리, fallback 이미지, 친구 기능, Firestore 처리가 대부분 `functions/index.js` 한 파일에 섞여 있었다.
 
-현재 구조는 다음과 같다.
+`final/bitduli-app` 내부의 현재 Functions 구조는 다음과 같다.
 
 ```text
 functions/
@@ -121,9 +121,11 @@ functions/
 
 ## 로컬 실행 및 검사
 
-프로젝트 루트에서 실행한다.
+저장소 루트에서 앱 폴더로 이동한 뒤 실행한다.
 
 ```powershell
+cd final/bitduli-app
+
 npm ci
 npm run lint
 npm run build
@@ -147,6 +149,6 @@ npm --prefix functions run test:emulator
 - Firebase App Check 적용
 - 사용자별 AI 호출 할당량 적용
 
-세부 callable 요청·응답, Secret 설정, 담당자 작업 경계와 배포 점검 항목은 [SERVER_STRUCTURE.md](./SERVER_STRUCTURE.md)에서 확인할 수 있다.
+세부 callable 요청·응답, Secret 설정, 담당자 작업 경계와 배포 점검 항목은 [SERVER_STRUCTURE.md](./final/bitduli-app/SERVER_STRUCTURE.md)에서 확인할 수 있다.
 
 > 이 브랜치의 코드는 GitHub에 push되어 있지만 Firebase 운영 환경에는 자동 배포되지 않는다.
